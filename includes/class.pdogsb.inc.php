@@ -542,14 +542,4 @@ class PdoGsb
         $requetePrepare->bindParam(':moisPrecedent', $moisPrecedent, PDO::PARAM_STR);
         $requetePrepare->execute();        
     }
-    /**
-     * Met les frais forfaitisés à 0 dès que le comptable veut reinitialiser la fiche.
-     */
-    public function reinitialiserFraisForfait(){
-    $requetePrepare = PdoGsb::$monPdo->prepare(
-            'INSERT INTO fraisforfait.montant '
-            . 'VALUES(0,0,0,0)'
-        );
-    $requetePrepare->execute();      
-    }
 }

@@ -41,9 +41,9 @@ switch ($action) {
         $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
         $lesMois = getLesDouzeDerniersMois($mois);
         $moisASelectionner=$leMois;
-        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $mois);
-        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $mois);
-        $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $mois);
+        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
+        $lesInfosFicheFrais = $pdo->getLesInfosFicheFrais($idVisiteur, $leMois);
         $nbJustificatifs = $lesInfosFicheFrais['nbJustificatifs'];
         if(!is_array($lesInfosFicheFrais)){
             ajouterErreur('Pas de fiche de frais pour ce visiteur ce mois');
@@ -53,14 +53,27 @@ switch ($action) {
         else{
             include 'vues/v_afficheFrais.php';
         }
-        //include 'vues/v_afficheFrais.php';
-        break;
-    case 'reinitialiserFrais': 
-        $pdo->reinitialiserFraisForfait();
-        include 'vues/v_afficheFrais.php';
         break;
     case 'validerMajFraisForfait':
-        echo "la modification a bien été prise en compte";
+        $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
+        $lesVisiteurs=$pdo->getLesVisiteurs();
+        $visiteurASelectionner=$idVisiteur;
+        $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
+        $lesMois = getLesDouzeDerniersMois($mois);
+        $moisASelectionner=$leMois;
+        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
+        $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
+        var_dump($lesFrais);
+        if (lesQteFraisValides($lesFrais)) {
+                $pdo->majFraisForfait($idVisiteur, $mois, $lesFrais);
+                echo "la modification a bien été prise en compte";  
+                $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+            } else {
+                ajouterErreur('Les valeurs des frais doivent être numériques');
+                include 'vues/v_erreurs.php';
+            }
+        include 'vues/v_afficheFrais.php';
         $ficheVA= $pdo->majEtatFicheFrais($idVisiteur, $mois, $etat);
         break;
     

@@ -51,7 +51,7 @@
                         $mois = $unMois['mois'];
                         $numAnnee = $unMois['numAnnee'];
                         $numMois = $unMois['numMois'];
-                        if ($unMois == $moisASelectionner) {
+                        if ($mois == $moisASelectionner) {
                             ?>
                             <option selected value="<?php echo $mois ?>">
                                 <?php echo $numMois . '/' . $numAnnee ?> </option>
@@ -72,7 +72,10 @@
 <div class="row">    
     <h2 style="color:orange">&nbsp;Valider la fiche de frais</h2>
     <h3>&nbsp;&nbsp;Eléments forfaitisés</h3>
-    <div class="col-md-4">   
+    <div class="col-md-4">  
+        <form method="post" 
+              action="index.php?uc=validFrais&action=validerMajFraisForfait" 
+              role="form">
             <fieldset>
                 <?php
                 foreach ($lesFraisForfait as $unFrais) {
@@ -89,12 +92,11 @@
                     </div>
                     <?php
                 }
-                ?>
-                <a href="index.php?uc=validFrais&action=validerMajFraisForfait" 
-                <button class="btn btn-success" type="edit">Corriger</button></a>
-                <a href="index.php?uc=validFrais&action=reinitialiserFrais"          
-                <button class="btn btn-danger" type="reset">Reinitialiser</button></a>
+                ?> 
+                <button class="btn btn-success" type="submit">Corriger</button>       
+                <button class="btn btn-danger" type="reset">Reinitialiser</button>
             </fieldset>
+        </form>
     </div>
 </div>
 <hr>
