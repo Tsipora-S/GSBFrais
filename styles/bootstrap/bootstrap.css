@@ -2599,11 +2599,10 @@ output {
 }
 
 .form-control-me {
-  display: block;
   height: 34px;
+  width: 4%;
   padding: 6px 12px;
   font-size: 14px;
-  line-height: 1.42857143;
   color: #555;
   background-color: #fff;
   background-image: none;
@@ -5216,6 +5215,12 @@ a.thumbnail.active {
   color: #31708f;
   background-color: #d9edf7;
   border-color: #bce8f1;
+}
+
+.alert-info-me {
+  color: #faa401;
+  background-color: #f7e26d;
+  border-color: #faa401;
 }
 .alert-info hr {
   border-top-color: #a6e1ec;

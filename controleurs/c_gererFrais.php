@@ -33,7 +33,7 @@ case 'validerCreationFrais':
     $dateFrais = filter_input(INPUT_POST, 'dateFrais', FILTER_SANITIZE_STRING);
     $libelle = filter_input(INPUT_POST, 'libelle', FILTER_SANITIZE_STRING);
     $montant = filter_input(INPUT_POST, 'montant', FILTER_VALIDATE_FLOAT);
-    var_dump($montant);//var_dump= afficher les informations d'une variable.
+    //var_dump($montant);//var_dump= afficher les informations d'une variable.
     valideInfosFrais($dateFrais, $libelle, $montant);
     if (nbErreurs() != 0) {
         include 'vues/v_erreurs.php';

@@ -252,7 +252,7 @@ class PdoGsb
      */
     public function majNbJustificatifs($idVisiteur, $mois, $nbJustificatifs)
     {
-        $requetePrepare = PdoGB::$monPdo->prepare(
+        $requetePrepare = PdoGSB::$monPdo->prepare(
             'UPDATE fichefrais '
             . 'SET nbjustificatifs = :unNbJustificatifs '
             . 'WHERE fichefrais.idvisiteur = :unIdVisiteur '
@@ -541,5 +541,39 @@ class PdoGsb
         );
         $requetePrepare->bindParam(':moisPrecedent', $moisPrecedent, PDO::PARAM_STR);
         $requetePrepare->execute();        
+    }
+    
+    /**
+     * Met à jour la table ligneFraisHorsForfait pour un visiteur et
+     * un mois donné en enregistrant les nouveaux montants
+     *
+     * @param type $idVisiteur ID du visiteur
+     * @param type $leMois       Mois sous la forme aaaamm
+     * @param type  $libelleHF   
+     * @param type $dateHF
+     * @param type $montantHF
+     * @return null
+     */
+    
+    public function majFraisHorsForfait(
+        $idVisiteur,
+        $leMois,
+        $libelleHF,
+        $dateHF,
+        $montantHF
+    ) {
+        $dateHF = dateFrancaisVersAnglais($dateHF);
+        $requetePrepare = PdoGSB::$monPdo->prepare(
+            'UPDATE lignefraishorsforfait '
+                . 'SET lignefraishorsforfait.libelle = :unLibelle,lignefraishorsforfait.date = :uneDateHF,lignefraishorsforfait.montant = :unMontant '
+                . 'WHERE lignefraishorsforfait.idvisiteur = :unIdVisiteur '
+                . 'AND lignefraishorsforfait.mois = :unMois '
+            );
+        $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unLibelle', $libelleHF, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':uneDateHF', $dateHF, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMontant', $montantHF, PDO::PARAM_INT);
+        $requetePrepare->execute();
     }
 }

@@ -61,22 +61,59 @@ switch ($action) {
         $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
         $lesMois = getLesDouzeDerniersMois($mois);
         $moisASelectionner=$leMois;
-        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
-        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
         $lesFrais = filter_input(INPUT_POST, 'lesFrais', FILTER_DEFAULT, FILTER_FORCE_ARRAY);
-        var_dump($lesFrais);
         if (lesQteFraisValides($lesFrais)) {
-                $pdo->majFraisForfait($idVisiteur, $mois, $lesFrais);
-                echo "la modification a bien été prise en compte";  
-                $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
-            } else {
+                $pdo->majFraisForfait($idVisiteur, $leMois, $lesFrais);
+                echo "La modification a bien été prise en compte.";  
+        } else {
                 ajouterErreur('Les valeurs des frais doivent être numériques');
                 include 'vues/v_erreurs.php';
-            }
+               }
+        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);  
+        
         include 'vues/v_afficheFrais.php';
-        $ficheVA= $pdo->majEtatFicheFrais($idVisiteur, $mois, $etat);
         break;
-    
+    case 'validerMajFraisHorsForfait':
+        $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
+        $lesVisiteurs=$pdo->getLesVisiteurs();
+        $visiteurASelectionner=$idVisiteur;
+        $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
+        $lesMois = getLesDouzeDerniersMois($mois);
+        $moisASelectionner=$leMois;
+        $dateHF=filter_input(INPUT_POST, 'dateHF', FILTER_SANITIZE_STRING);
+        $montantHF=filter_input(INPUT_POST, 'montantHF', FILTER_SANITIZE_STRING);
+        $libelleHF=filter_input(INPUT_POST, 'libelleHF', FILTER_SANITIZE_STRING);
+        valideInfosFrais($dateHF, $libelleHF, $montantHF);
+        if (nbErreurs() != 0) {
+            include 'vues/v_erreurs.php';
+        } else {
+             $pdo->creeNouveauFraisHorsForfait(
+                $idVisiteur,
+                $leMois,
+                $libelleHF,
+                $dateHF,
+                $montantHF
+            );
+        }
+        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
+        $nbJustificatifs = filter_input(INPUT_POST, 'nbJust', FILTER_SANITIZE_STRING);
+        include 'vues/v_afficheFrais.php';
+        break;
+    case 'validerFiche':
+        $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
+        $lesVisiteurs=$pdo->getLesVisiteurs();
+        $visiteurASelectionner=$idVisiteur;
+        $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
+        $lesMois = getLesDouzeDerniersMois($mois);
+        $moisASelectionner=$leMois;
+        $nbJustificatifs = filter_input(INPUT_POST, 'nbJust', FILTER_SANITIZE_STRING);
+        $etat='VA';
+        $pdo->majEtatFicheFrais($idVisiteur, $leMois, $etat);
+        $pdo->majNbJustificatifs($idVisiteur, $leMois, $nbJustificatifs);
+        include 'vues/v_retourAccueil.php';
+        break;
 }
 
 
