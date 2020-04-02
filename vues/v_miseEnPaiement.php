@@ -14,7 +14,7 @@
               role="form">
     <input name="lstMois" type="hidden" id="lstMois" class="form-control" value="<?php echo $moisASelectionner ?>">
     <input name="lstVisiteurs" type="hidden" id="lstVisiteurs" class="form-control" value="<?php echo $visiteurASelectionner ?>">
-    <input id="ok" type="submit" value="Payer" class="btn btn-success" 
+    <input id="ok" type="submit" value="Mise en paiement" class="btn btn-success" 
             role="button">
 </form>
 

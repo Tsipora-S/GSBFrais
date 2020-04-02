@@ -128,23 +128,28 @@
                     <td><input name="dateHF" type="text" id="txtDateHF" class="form-control" value="<?php echo $date ?>"></td>
                     <td><input name="libelleHF" type="text" id="txtLibelleHF" class="form-control" value="<?php echo $libelle ?>"></td>
                     <td><input name="montantHF" type="text" id="txtMontantHF" class="form-control" value="<?php echo $montant ?>"></td>
-                    <th><button class="btn btn-success" type="edit">Corriger</button>
-                        <button class="btn btn-danger" type="reset">Reinitialiser</button></th>
+                    <input id="id"  name="FraisHorsForfait[<?php echo $id ?>]" value="<?php echo $id ?>" type="hidden">  <!-- pour pouvoir recuperer tous les id et ansi modifier chaque champ selon son id -->
+                    <th><button class="btn btn-success" type="edit" name="corriger" value="corriger">Corriger</button>
+                        <button class="btn btn-danger" type="reset">Reinitialiser</button>
+                    </th>
+                    <td>
+                        <button class="btn btn-success" type="submit" name="refuser" value="refuser" onclick="return confirm('Voulez-vous vraiment refuser ce frais?');">Refuser</button>
+                        <button class="btn btn-danger" type="submit" name="reporter" value="reporter" onclick="return confirm('Voulez-vous vraiment reporter ce frais?');">Reporter</button>    
+                    </td>               
                 </tr>
-            
-            <?php
+            </form>
+        <?php
         }
         ?>
     </table>
 </div>
-
-Nombre de justificatifs: <input type="text" id="nbJust" name="nbJust" class="form-control-me" value="<?php echo $nbJustificatifs ?>"><br><br> 
-            </form>
+                    
 <form method="post" 
               action="index.php?uc=validFrais&action=validerFiche" 
               role="form">
     <input name="lstMois" type="hidden" id="lstMois" class="form-control" value="<?php echo $moisASelectionner ?>">
     <input name="lstVisiteurs" type="hidden" id="lstVisiteurs" class="form-control" value="<?php echo $visiteurASelectionner ?>">
+      Nombre de justificatifs: <input type="text" id="nbJust" name="nbJust" class="form-control-me" value="<?php echo $nbJustificatifs ?>"><br><br> 
     <input id="ok" type="submit" value="Valider" class="btn btn-success" 
             role="button">
     <button class="btn btn-danger" type="reset">Reinitialiser</button>

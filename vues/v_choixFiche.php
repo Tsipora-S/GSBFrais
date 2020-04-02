@@ -24,7 +24,7 @@
                         $mois = $unMois['mois'];
                         $numAnnee = $unMois['numAnnee'];
                         $numMois = $unMois['numMois'];
-                        if ($mois == $moisASelectionner) {
+                        if ($unMois == $moisASelectionner) {
                             ?>
                             <option selected value="<?php echo $mois ?>">
                                 <?php echo $numMois . '/' . $numAnnee ?> </option>
@@ -66,7 +66,6 @@
 
                 </select>
             </div>
-            
             <input id="ok" type="submit" value="Valider" class="btn btn-success" 
                    role="button">
         </form>

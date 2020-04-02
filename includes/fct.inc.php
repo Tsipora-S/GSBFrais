@@ -258,7 +258,13 @@ function nbErreurs()
         return count($_REQUEST['erreurs']);
     }
 }
-
+/**
+ * Fonction qui retourne le mois précédent un mois passé en paramètre
+ *
+ * @param String $mois Contient le mois à utiliser
+ *
+ * @return String le mois d'avant
+ */
 function getMoisPrecedent($mois){
     $numAnnee = substr($mois, 0, 4);
     $numMois = substr($mois, 4, 2);
@@ -274,7 +280,34 @@ function getMoisPrecedent($mois){
         }
     return $numAnnee.$numMois;
 }
-
+/**
+ * Fonction qui retourne le mois suivant un mois passé en paramètre
+ *
+ * @param String $mois Contient le mois à utiliser
+ *
+ * @return String le mois d'après
+ */
+function getMoisSuivant($mois)
+{
+    $numAnnee = substr($mois, 0, 4);
+    $numMois = substr($mois, 4, 2);
+    if ($numMois == '12') {
+        $numMois = '01';
+        $numAnnee++;
+    } else {
+        $numMois++;
+    }
+    if (strlen($numMois) == 1) {
+        $numMois = '0' . $numMois;
+    }
+    return $numAnnee . $numMois;
+}
+/**
+ * Fonction qui retourne les 12 derniers mois
+ * 
+ * @param String $mois   Contient le mois à utiliser
+ * @return String        Les 12 mois d'avant
+ */
 function getLesDouzeDerniersMois($mois){
     $lesMois= array();
     for ($k=0;$k<=12;$k++){

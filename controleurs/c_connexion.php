@@ -50,4 +50,3 @@ default:
    include 'vues/v_connexion.php';
    break;
 }
-
