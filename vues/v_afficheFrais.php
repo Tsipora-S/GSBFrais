@@ -117,7 +117,8 @@
         foreach ($lesFraisHorsForfait as $unFraisHorsForfait) {
             $date = $unFraisHorsForfait['date'];
             $libelle = htmlspecialchars($unFraisHorsForfait['libelle']);
-            $montant = $unFraisHorsForfait['montant']; ?>
+            $montant = $unFraisHorsForfait['montant'];
+            $idFHF = $unFraisHorsForfait['id'];?>
             <form method="post" 
                   accept-charset=""action="index.php?uc=validFrais&action=validerMajFraisHorsForfait" 
                   accesskey=""role="form">
@@ -128,7 +129,7 @@
                     <td><input name="dateHF" type="text" id="txtDateHF" class="form-control" value="<?php echo $date ?>"></td>
                     <td><input name="libelleHF" type="text" id="txtLibelleHF" class="form-control" value="<?php echo $libelle ?>"></td>
                     <td><input name="montantHF" type="text" id="txtMontantHF" class="form-control" value="<?php echo $montant ?>"></td>
-                    <input id="id"  name="FraisHorsForfait[<?php echo $id ?>]" value="<?php echo $id ?>" type="hidden">  <!-- pour pouvoir recuperer tous les id et ansi modifier chaque champ selon son id -->
+                    <td><input name="idFHF" type="hidden" id="idFHF" class="form-control" value="<?php echo $idFHF ?>"></td>
                     <th><button class="btn btn-success" type="edit" name="corriger" value="corriger">Corriger</button>
                         <button class="btn btn-danger" type="reset">Reinitialiser</button>
                     </th>

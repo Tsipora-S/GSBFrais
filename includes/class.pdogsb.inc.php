@@ -206,6 +206,20 @@ class PdoGsb
         $requetePrepare->execute();
         return $requetePrepare->fetchAll();
     }
+    /**
+     * Retourne tous les id de la table FraisHorsForfait
+     *
+     * @return un tableau associatif
+     */
+    public function getLesIdFHF()
+    {
+        $requetePrepare = PdoGsb::$monPdo->prepare(
+            'SELECT lignefraishorsforfait.id as idFHF '
+            . 'FROM lignefraishorsforfait ORDER BY lignefraishorsforfait.id'
+        );
+        $requetePrepare->execute();
+        return $requetePrepare->fetchAll();
+    }
 
     /**
      * Met à jour la table ligneFraisForfait
@@ -602,18 +616,20 @@ class PdoGsb
      * @param int $leMois            Mois sous la forme aaaamm
      * @return int                   Somme du montant des frais hors forfait
      */
-     public function montantHF($idVisiteur, $leMois){
+     public function montantHF($idVisiteur,$leMois){
         $requetePrepare = PdoGsb::$monPdo->prepare(
         'SELECT SUM(lignefraishorsforfait.montant) '
         . 'FROM lignefraishorsforfait '
         . 'WHERE lignefraishorsforfait.idvisiteur = :unIdVisiteur '
         . 'AND lignefraishorsforfait.mois = :unMois '
+        . 'AND lignefraishorsforfait.libelle not in (SELECT libelle '
+                . 'FROM lignefraishorsforfait '
+                . 'WHERE libelle like "REFUSÉ:%")'    
         );
         $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
         $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);
         $requetePrepare->execute();
         return $requetePrepare->fetchAll();
-
     }
     /**
      * Retourne la somme du montant total des frais hors forfait+celui des frais forfaitisés
@@ -635,7 +651,7 @@ class PdoGsb
         $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);
         $requetePrepare->execute();
     }
-
+    
     /**
      * Modifie le libellé en ajoutant en début le texte « REFUSE : » 
      * @param string $idVisiteur      ID du visiteur
@@ -643,7 +659,7 @@ class PdoGsb
      * @param string $libelleHF       Libellé du frais
      */
     public function refuseFHF($idVisiteur,$leMois,$libelleHF){
-        echo $idVisiteur." ".$leMois." ".$libelleHF;
+       // echo $idVisiteur." ".$leMois." ".$libelleHF;
         $requetePrepare = PdoGsb::$monPdo->prepare(
         "UPDATE lignefraishorsforfait "
         ."SET libelle = CONCAT('REFUSÉ: ', libelle) "
@@ -655,51 +671,76 @@ class PdoGsb
         $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);*/
         $requetePrepare->execute(); 
     }
+    
     /**
-     * Cree une nouvelle fiche dans le mois suivant dans le ca d'un report du frais hors forfait
-     * @param type $idVisiteur      ID du visiteur
-     * @param type $leMois          Mois sous la forme aaaamm
-     * @param type $libelleHF       Libellé du frais
-     * @param type $dateHF          Date du frais
-     * @param type $montantHF       Montant du frais
-     * @param type $idFrais         ID du frais à reporter
+     * Cree nouveau fhf dans la fiche du mois suivant dans le cas d'un report du frais hors forfait
+     * @param string $idVisiteur    ID du visiteur
+     * @param int $leMois           Mois sous la forme aaaamm
+     * @param string $libelleHF     Libellé du frais
+     * @param string $dateHF        Date du frais
+     * @param int $montantHF        Montant du frais
      */
-    public function creeFHFReporté($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF,$idFrais){
-        foreach($idFrais as $unIdFHF){
-            $libelleHF=$libelleHF[$unIdFHF];
-            $dateHF=$dateHF[$unIdFHF];
-            $montantHF=$montantHF[$unIdFHF];
-            $dateFr = dateFrancaisVersAnglais($date);
+    public function creeFHFReporté($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF){
+                    //var_dump($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF);
+            $dateFr = dateFrancaisVersAnglais($dateHF);
             $requetePrepare = PdoGSB::$monPdo->prepare(
-                'INSERT INTO lignefraishorsforfait '
-                . 'VALUES (null, :unIdVisiteur,:unMois, :unLibelle, :uneDateFr,'
-                . ':unMontant) '
+                "INSERT INTO lignefraishorsforfait "
+                . "VALUES (null, :unIdVisiteur,:unMois,'$libelleHF', :uneDateFr,:unMontant)"
             );
             $requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
-            $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
-            $requetePrepare->bindParam(':unLibelle', $libelle, PDO::PARAM_STR);
+            $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);
+            //$requetePrepare->bindParam(':unLibelle', $libelleHF, PDO::PARAM_STR);
             $requetePrepare->bindParam(':uneDateFr', $dateFr, PDO::PARAM_STR);
-            $requetePrepare->bindParam(':unMontant', $montant, PDO::PARAM_INT);
+            $requetePrepare->bindParam(':unMontant', $montantHF, PDO::PARAM_INT);
             $requetePrepare->execute();
-        }
     }
- 
+    /**
+     * Enlève le texte "REFUSE: " du libelle du fhf qui a été reporté
+     * @param string $idVisiteur   ID du visiteur
+     * @param int $leMois          Mois sous la forme aaaamm
+     * @param string $libelleHF    Libellé du frais
+     * @param string $dateHF       Date du frais
+     * @param int $montantHF       Montant du frais
+     */
+    public function enleverTexteRefusé($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF){
+        //var_dump($idVisiteur,$leMois,$libelleHF,$date,$montantHF);
+        $dateFr = dateFrancaisVersAnglais($dateHF);
+        $requetePrepare = PdoGSB::$monPdo->prepare(
+                "UPDATE lignefraishorsforfait "
+                . "SET libelle=SUBSTR('$libelleHF',8) "
+                . "WHERE idvisiteur='$idVisiteur' "
+                . "AND mois='$leMois' "
+                . "AND date='$dateFr'"
+                . "AND montant='$montantHF'"
+            );    
+        $requetePrepare->execute();
+        /*$requetePrepare->bindParam(':unIdVisiteur', $idVisiteur, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);  
+        //$requetePrepare->bindParam(':unLibelle', $libelleHF, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':uneDateFr', $dateFr, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMontant', $montantHF, PDO::PARAM_INT);
+        $requetePrepare->execute();*/
+    /*    if($requetePrepare->execute()){
+            echo "bien";
+        }else{
+            echo "pas bien";
+        }*/
+    }
     /**
      * Supprime le frais hors forfait lorsqu'il est reporté
-     * @param type $idFrais  ID du frais hors forfait
+     * @param type $idFHF  ID du frais hors forfait
      * @param type $leMois   Mois sous la forme aaaamm  
      */
-     public function supprimerFHFReporté($idFrais,$leMois)
+     public function supprimerFHFReporté($idFHF,$leMois)
     {
-         foreach ($idFrais as $id){
-        $requetePrepare = PdoGSB::$monPdo->prepare(
-            'DELETE FROM lignefraishorsforfait '
-            . 'WHERE lignefraishorsforfait.id = :unIdFrais AND lignefraishorsforfait.mois = :mois '  
-        );
-        $requetePrepare->bindParam(':unIdFrais', $id, PDO::PARAM_STR);
-         $requetePrepare->bindParam(':mois', $mois, PDO::PARAM_INT);
-        $requetePrepare->execute();
-    }
+                $requetePrepare = PdoGSB::$monPdo->prepare(
+                    'DELETE FROM lignefraishorsforfait '
+                    . 'WHERE lignefraishorsforfait.id = :unIdFHF '
+                    . 'AND lignefraishorsforfait.mois = :unMois '  
+                );
+                $requetePrepare->bindParam(':unIdFHF', $idFHF, PDO::PARAM_STR);
+                $requetePrepare->bindParam(':unMois', $leMois, PDO::PARAM_STR);
+                $requetePrepare->execute();
     }
     
     /**

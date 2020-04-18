@@ -84,51 +84,38 @@ switch ($action) {
         $dateHF=filter_input(INPUT_POST, 'dateHF', FILTER_SANITIZE_STRING);
         $montantHF=filter_input(INPUT_POST, 'montantHF', FILTER_SANITIZE_STRING);
         $libelleHF=filter_input(INPUT_POST, 'libelleHF', FILTER_SANITIZE_STRING);
-        $idFHF=filter_input(INPUT_POST, 'FraisHorsForfait', FILTER_DEFAULT , FILTER_FORCE_ARRAY);
         if(isset($_POST['corriger'])){
-        valideInfosFrais($dateHF, $libelleHF, $montantHF);
-        if (nbErreurs() != 0) {
-            include 'vues/v_erreurs.php';
-        } else {
-             $pdo->majFraisHorsForfait(
-                $idVisiteur,
-                $leMois,
-                $libelleHF,
-                $dateHF,
-                $montantHF
-            );
-        }
-        $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
-        $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
-        $nbJustificatifs = filter_input(INPUT_POST, 'nbJust', FILTER_SANITIZE_STRING);
-        include 'vues/v_afficheFrais.php';
+            valideInfosFrais($dateHF, $libelleHF, $montantHF);
+            if (nbErreurs() != 0) {
+                include 'vues/v_erreurs.php';
+            } else {
+                 $pdo->majFraisHorsForfait(
+                     $idVisiteur,
+                     $leMois,
+                     $libelleHF,
+                     $dateHF,
+                     $montantHF
+                    );
+            }
+            $lesFraisForfait = $pdo->getLesFraisForfait($idVisiteur, $leMois);
+            $lesFraisHorsForfait = $pdo->getLesFraisHorsForfait($idVisiteur, $leMois);
+            $nbJustificatifs = filter_input(INPUT_POST, 'nbJust', FILTER_SANITIZE_STRING);
+            include 'vues/v_afficheFrais.php';
+            $idFHF=filter_input(INPUT_POST, 'idFHF', FILTER_SANITIZE_STRING);
         }
         if(isset($_POST['refuser'])){
-            echo $idVisiteur." coucou ".$leMois." ".$libelleHF;
             $pdo->refuseFHF($idVisiteur,$leMois,$libelleHF);
         }
         if (isset($_POST['reporter'])) {
-            $leMois=$leMois+1;
-            if ($pdo->estPremierFraisMois($idVisiteur, $leMois)) {
+            $leMois=getMoisSuivant($leMois);      
+            if ($pdo->estPremierFraisMois($idVisiteur, $leMois)==false) {
                 $pdo->creeNouvellesLignesFrais($idVisiteur, $leMois);
-            } 
-            $pdo->creeFHFReporté($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF,$idFrais); 
-            $leMois=$leMois-1;
-            $pdo->supprimerFHFReporté($idFHF,$leMois); //supprime le fhf du mois initial
+            }
+            $pdo->creeFHFReporté($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF);
+            $pdo->enleverTexteRefusé($idVisiteur,$leMois,$libelleHF,$dateHF,$montantHF);
+            $leMois= getMoisPrecedent($leMois);
+            //$pdo->supprimerFHFReporté($idFHF,$leMois); //supprime le fhf du mois initial
         }
-        break;
-    case 'refuse':
-        $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
-        $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
-        $libelleHF=filter_input(INPUT_POST, 'libelleHF', FILTER_SANITIZE_STRING);
-        echo $idVisiteur." ".$leMois." ".$libelleHF;
-        $pdo->refuseFHF('a17','201912','Achat de fleurs');
-        break;
-    case 'report':
-        $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
-        $leMois = filter_input(INPUT_POST, 'lstMois', FILTER_SANITIZE_STRING);
-        $libelleHF=filter_input(INPUT_POST, 'libelleHF', FILTER_SANITIZE_STRING);
-        $pdo->reportAuMoisSuivant($idVisiteur,$leMois,$libelleHF);
         break;
     case 'validerFiche':
         $idVisiteur = filter_input(INPUT_POST, 'lstVisiteurs', FILTER_SANITIZE_STRING);
@@ -141,7 +128,7 @@ switch ($action) {
         $etat='VA';
         $pdo->majEtatFicheFrais($idVisiteur, $leMois, $etat);
         $pdo->majNbJustificatifs($idVisiteur, $leMois, $nbJustificatifs);
-        $sommeHF=$pdo->montantHF($idVisiteur,$leMois);//getTotalFraisHorsForfait($idVisiteur,$leMois);
+        $sommeHF=$pdo->montantHF($idVisiteur,$leMois);
         //var_dump($sommeHF);
         $totalHF=$sommeHF[0][0];
         $sommeFF=$pdo->montantFF($idVisiteur,$leMois);
